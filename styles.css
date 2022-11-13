@@ -1,3 +1,41 @@
 * {
-  background-color: green;
+  /* background-color: green; */
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.main-container {
+  width: 400px;
+  height: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.row,
+.bottom-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.btn-calculator {
+  height: 40px;
+  width: 40px;
+}
+
+#btn-equals {
+  width: 80px;
+}
+
+.output-screen {
+  background-color: grey;
+  padding: 9px;
+  text-align: right;
+  width: 143px;
+  height: 20px;
 }
