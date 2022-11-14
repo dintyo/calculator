@@ -74,7 +74,7 @@ const buttonPushed = function (e) {
   ///////////////////////////////////////
   // clear is pressed
 
-  if (e.target.textContent === "clear") {
+  if (e.target.textContent === "AC") {
     output.textContent = "";
     currentScreen = "";
     calculatedValue = 0;
@@ -86,14 +86,15 @@ const buttonPushed = function (e) {
   ///////////////////////////////////////
   // delete is pressed
 
-  if (e.target.textContent === "del") {
+  if (e.target.textContent === "C") {
     // remove the last letter of the string in the calculator
-    currentScreen = currentScreen.substring(0, currentScreen.length - 1);
+    currentScreen = 0;
     // if there is an element in the array, we already have a result stored for the next calculation, update the number in the calcArr when we hit the delete key
     if (calcArr.length == 1) {
-      calcArr[0] = currentScreen;
+      calcArr[0] = 0;
     }
-    printToScreen(currentScreen);
+    operatorFlag = true;
+    updateScreen(currentScreen);
     // exit the function
     return null;
   }
@@ -105,7 +106,7 @@ const buttonPushed = function (e) {
     if (calcArr.length === 2) {
       calcArr.push(currentScreen);
       const result = operate(calcArr[1], calcArr[0], calcArr[2]);
-      printToScreen(result);
+      updateScreen(result);
       calcArr = [];
       calcArr.push(result);
     }
@@ -133,7 +134,7 @@ const buttonPushed = function (e) {
       calcArr.push(output.textContent);
       console.log(calcArr);
       const result = operate(calcArr[1], calcArr[0], calcArr[2]);
-      printToScreen(result);
+      updateScreen(result);
       calcArr = [];
       console.log("did this happen twice?");
       calcArr.push(result);
@@ -153,14 +154,14 @@ const buttonPushed = function (e) {
     if (!operatorFlag) {
       // if we don't have an operator selected
       currentScreen += e.target.textContent;
-      printToScreen(currentScreen);
+      updateScreen(currentScreen);
       operatorFlag = false;
       unToggleOperators();
     } else {
       // we have an operator selected, so clear the screen
       // by setting the new number to be the button pressed
       currentScreen = e.target.textContent;
-      printToScreen(currentScreen);
+      updateScreen(currentScreen);
       operatorFlag = false;
       unToggleOperators();
     }
@@ -176,7 +177,7 @@ const unToggleOperators = function () {
   btnMinus.classList.remove("operator-pressed");
 };
 
-const printToScreen = function (str) {
+const updateScreen = function (str) {
   currentScreen = str;
   output.textContent = currentScreen;
 };

@@ -1,5 +1,10 @@
 * {
-  /* background-color: green; */
+  background-color: white;
+}
+
+@font-face {
+  font-family: "Digital 7";
+  src: url(fonts/digital-7.ttf) format("truetype");
 }
 
 body {
@@ -33,6 +38,8 @@ body {
 }
 
 .output-screen {
+  font-family: "Digital 7", Verdana, Tahoma;
+  font-size: 200%;
   background-color: grey;
   padding: 9px;
   text-align: right;
