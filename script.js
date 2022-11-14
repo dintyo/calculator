@@ -8,7 +8,7 @@ let currentScreen = "";
 let calculatedValue = 0;
 let calcArr = [0];
 let operatorFlag = false;
-const maxNumberDigits = 8;
+const maxNumberDigits = 9;
 
 ///////////////////////////////////////
 // DOM elements
@@ -60,6 +60,7 @@ const divide = function (a, b) {
 };
 
 const operate = function (operator, a, b) {
+  console.log(`operator: ${operator}, a: ${a}, b: ${b}`);
   let result = 0;
   // do calculation and return a string after the calc
   if (operator == "+") result = add(a, b);
@@ -67,25 +68,62 @@ const operate = function (operator, a, b) {
   if (operator == "*") result = multiply(a, b);
   if (operator == "/") result = divide(a, b);
 
+  console.log(`result: ${result}`);
+
   //convert to string so we can use .length
   result += "";
-  if (result.length > maxNumberDigits) {
-    if (result.includes(".")) {
-      let wholeNumber = result.match(/\d*(?=[.])/) + "";
-
-      if (wholeNumber.length > maxNumberDigits) {
-        wholeNumber = Number(wholeNumber).toExponential(4);
-      }
-      console.log(`whole number = ${wholeNumber}`);
-      console.log(wholeNumber.length);
-      result = parseFloat(result).toFixed(maxNumberDigits - wholeNumber.length);
-    } else {
-      console.log("number was bigger than 8 digits");
-      result = Number(result).toExponential(4);
-    }
-  }
-  if (result.length > maxNumberDigits) result = Number(result).toExponential(4);
+  // if the result is too big for the screen, we need to
+  // do some calculations to fit the number
+  if (result.length > maxNumberDigits) return fitNumber(result);
   return result;
+};
+
+const fitNumber = function (result) {
+  // if the result is a number with a decimal point
+  // and doesn't include an exponent (eg. 0.333333 or 523.1919191)
+  if (result.includes(".") && !result.includes("e")) {
+    // this regex gets all the digits before the decimal point
+    const wholeNumber = result.match(/\d*(?=[.])/) + "";
+    // this regex gets everything after the decimal point
+    let decimalNumber = result.match(/[^.]*$/) + "";
+
+    // we want to find how many decimals we are allowed
+    // based on the number of wholeNumber digits
+    const numOfDecimalsAllowed = maxNumberDigits - wholeNumber.length;
+
+    // in this case, the wholeNumber is already too big
+    // just return the whole number as an exponential
+    if (numOfDecimalsAllowed <= 0) {
+      result = Number(wholeNumber).toExponential(2);
+      return result + "";
+    }
+
+    // here we cut off the number of allowed decimals, and round the last decimal
+    // after our maximum allowed numbers and convert back to string
+    decimalNumber =
+      Math.round(Number(decimalNumber.slice(0, numOfDecimalsAllowed)) / 10) +
+      "";
+
+    // we need to account for the case that the wholeNumber is already
+    // the maximum allowed digits check for the case that
+    // numOfDecimalsAllowed is zero - in this case, we want to round
+    // the whole number based on the decimal
+    // note here:  the decimal number calculated above
+    // will either be 0 or 1 in this case
+    console.log(`number of decimals allowed: ${numOfDecimalsAllowed}`);
+    if (!numOfDecimalsAllowed) {
+      console.log(
+        `whole number is ${wholeNumber} and decimal number is ${decimalNumber}`
+      );
+      return Number(wholeNumber) + Number(decimalNumber) + "";
+    }
+    console.log(
+      `whole number is ${wholeNumber} and decimal number is ${decimalNumber}`
+    );
+    return wholeNumber + "." + decimalNumber;
+  }
+  result = Number(result).toExponential(2);
+  return result + "";
 };
 
 ///////////////////////////////////////
@@ -173,9 +211,33 @@ const operatorPushed = function (e) {
 };
 
 const numButtonPushed = function (e) {
+  // make sure we can't use two decimal points in a single line
+  // unless operator button is pressed, then allow
+  if (
+    (currentScreen + "").includes(".") &&
+    e.target.textContent === "." &&
+    !operatorFlag
+  )
+    return;
+
+  // account for the case that the user presses "." first or after using an operator
+  if (
+    (e.target.textContent === "." && currentScreen == 0) ||
+    (e.target.textContent === "." && operatorFlag)
+  ) {
+    currentScreen = "0";
+    console.log(`current screen ${currentScreen}`);
+    currentScreen += ".";
+    console.log(`current screen ${currentScreen}`);
+    updateScreen(currentScreen);
+    console.log("got here");
+    operatorFlag = false;
+    return;
+  }
+
   //if we have filled the screen and we don't have an
   //operator selected, do nothing
-  if (currentScreen.length > maxNumberDigits && !operatorFlag) return;
+  if (currentScreen.length >= maxNumberDigits && !operatorFlag) return;
   // we toggle the clear on any time a number is pushed
   toggleClear(1);
   if (!operatorFlag) {
@@ -198,8 +260,13 @@ const numButtonPushed = function (e) {
 // plus/minus button pressed
 
 const plusMinusPushed = function () {
-  const invertedNum = Number(currentScreen) * -1;
-  console.log(invertedNum);
+  let invertedNum = Number(currentScreen) * -1;
+  console.log(invertedNum > 9e8);
+  console.log(`invertedNum length = ${invertedNum.length}`);
+  if ((invertedNum + "").length >= maxNumberDigits) {
+    invertedNum = Number(invertedNum).toExponential(2);
+    console.log(`invertedNum after checking length ${invertedNum}`);
+  }
   updateScreen(invertedNum);
   if (calcArr.length === 1) calcArr[0] = invertedNum;
   console.log("calcArr after plusminus");
