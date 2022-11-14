@@ -39,3 +39,7 @@ body {
   width: 143px;
   height: 20px;
 }
+
+.operator-pressed {
+  background-color: grey;
+}
