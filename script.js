@@ -8,6 +8,7 @@ let currentScreen = "";
 let calculatedValue = 0;
 let calcArr = [0];
 let operatorFlag = false;
+const maxNumberDigits = 8;
 
 ///////////////////////////////////////
 // DOM elements
@@ -29,12 +30,13 @@ const btnMinus = document.querySelector("#btn-minus");
 
 const btn0 = document.querySelector("#btn-num-0");
 const btnPoint = document.querySelector("#btn-num-point");
-const btnModulo = document.querySelector("#btn-num-modulo");
+const btnPercentage = document.querySelector("#btn-num-percentage");
 const btnPlus = document.querySelector("#btn-plus");
 
 const btnClearAll = document.querySelector("#btn-clear-all");
 const btnDel = document.querySelector("#btn-del");
 const btnEquals = document.querySelector("#btn-equals");
+const btnPlusMinus = document.querySelector("#btn-plus-minus");
 
 const output = document.querySelector(".output-screen");
 
@@ -67,22 +69,22 @@ const operate = function (operator, a, b) {
 
   //convert to string so we can use .length
   result += "";
-  if (result.length > 8) {
+  if (result.length > maxNumberDigits) {
     if (result.includes(".")) {
       let wholeNumber = result.match(/\d*(?=[.])/) + "";
 
-      if (wholeNumber.length > 8) {
+      if (wholeNumber.length > maxNumberDigits) {
         wholeNumber = Number(wholeNumber).toExponential(4);
       }
       console.log(`whole number = ${wholeNumber}`);
       console.log(wholeNumber.length);
-      result = parseFloat(result).toFixed(9 - wholeNumber.length);
+      result = parseFloat(result).toFixed(maxNumberDigits - wholeNumber.length);
     } else {
       console.log("number was bigger than 8 digits");
       result = Number(result).toExponential(4);
     }
   }
-  console.log("operator was not valid");
+  if (result.length > maxNumberDigits) result = Number(result).toExponential(4);
   return result;
 };
 
@@ -173,7 +175,7 @@ const operatorPushed = function (e) {
 const numButtonPushed = function (e) {
   //if we have filled the screen and we don't have an
   //operator selected, do nothing
-  if (currentScreen.length > 9 && !operatorFlag) return;
+  if (currentScreen.length > maxNumberDigits && !operatorFlag) return;
   // we toggle the clear on any time a number is pushed
   toggleClear(1);
   if (!operatorFlag) {
@@ -191,6 +193,21 @@ const numButtonPushed = function (e) {
     unToggleOperators();
   }
 };
+
+///////////////////////////////////////
+// plus/minus button pressed
+
+const plusMinusPushed = function () {
+  const invertedNum = Number(currentScreen) * -1;
+  console.log(invertedNum);
+  updateScreen(invertedNum);
+  if (calcArr.length === 1) calcArr[0] = invertedNum;
+  console.log("calcArr after plusminus");
+  console.log(calcArr);
+};
+
+///////////////////////////////////////
+// percentage sign pressed
 
 ///////////////////////////////////////
 // helper functions
@@ -227,3 +244,5 @@ btnMultiply.addEventListener("click", operatorPushed);
 
 btnEquals.addEventListener("click", equalsPushed);
 btnClearAll.addEventListener("click", clearPushed);
+btnPlusMinus.addEventListener("click", plusMinusPushed);
+btnPercentage;
