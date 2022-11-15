@@ -110,7 +110,7 @@ body {
   align-items: center;
   justify-content: right;
   font-family: "Source Code Pro", monospace;
-  font-size: 150%;
+  font-size: 140%;
   color: rgb(247, 243, 253);
   background-color: var(--output-screen);
   padding: 9px;
@@ -121,6 +121,7 @@ body {
   border: 1px solid rgb(45, 48, 60);
   border-radius: 5px;
   margin-bottom: 10px;
+  overflow: hidden;
 }
 
 .operator-pressed {

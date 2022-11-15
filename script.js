@@ -80,56 +80,8 @@ const operate = function (operator, a, b) {
   result += "";
   // if the result is too big for the screen, we need to
   // do some calculations to fit the number
-  if (result.length > maxNumberDigits) return fitNumber(result);
+  if (result.length > maxNumberDigits + 1) return fitNumber(result);
   return result;
-};
-
-const fitNumber = function (result) {
-  // if the result is a number with a decimal point
-  // and doesn't include an exponent (eg. 0.333333 or 523.1919191)
-  if (result.includes(".") && !result.includes("e")) {
-    // this regex gets all the digits before the decimal point
-    const wholeNumber = result.match(/\d*(?=[.])/) + "";
-    // this regex gets everything after the decimal point
-    let decimalNumber = result.match(/[^.]*$/) + "";
-
-    // we want to find how many decimals we are allowed
-    // based on the number of wholeNumber digits
-    const numOfDecimalsAllowed = maxNumberDigits - wholeNumber.length;
-
-    // in this case, the wholeNumber is already too big
-    // just return the whole number as an exponential
-    if (numOfDecimalsAllowed <= 0) {
-      result = Number(wholeNumber).toExponential(2);
-      return result + "";
-    }
-
-    // here we cut off the number of allowed decimals, and round the last decimal
-    // after our maximum allowed numbers and convert back to string
-    decimalNumber =
-      Math.round(Number(decimalNumber.slice(0, numOfDecimalsAllowed)) / 10) +
-      "";
-
-    // we need to account for the case that the wholeNumber is already
-    // the maximum allowed digits check for the case that
-    // numOfDecimalsAllowed is zero - in this case, we want to round
-    // the whole number based on the decimal
-    // note here:  the decimal number calculated above
-    // will either be 0 or 1 in this case
-    console.log(`number of decimals allowed: ${numOfDecimalsAllowed}`);
-    if (!numOfDecimalsAllowed) {
-      console.log(
-        `whole number is ${wholeNumber} and decimal number is ${decimalNumber}`
-      );
-      return Number(wholeNumber) + Number(decimalNumber) + "";
-    }
-    console.log(
-      `whole number is ${wholeNumber} and decimal number is ${decimalNumber}`
-    );
-    return wholeNumber + "." + decimalNumber;
-  }
-  result = Number(result).toExponential(2);
-  return result + "";
 };
 
 ///////////////////////////////////////
@@ -168,7 +120,7 @@ const clearPushed = function () {
 };
 
 ///////////////////////////////////////
-// Equals is pressed
+// equals is pressed
 
 const equalsPushed = function (e) {
   // if there are two elements in the calcArray, we should run the calculation
@@ -202,7 +154,6 @@ const operatorPushed = function (e) {
     const result = operate(calcArr[1], calcArr[0], calcArr[2]);
     updateScreen(result);
     calcArr = [];
-    console.log("did this happen twice?");
     calcArr.push(result);
     calcArr.push(e.target.textContent);
     console.log(calcArr);
@@ -267,11 +218,10 @@ const numButtonPushed = function (e) {
 // plus/minus button pressed
 
 const plusMinusPushed = function () {
-  let invertedNum = Number(currentScreen) * -1;
-  console.log(invertedNum > 9e8);
+  let invertedNum = operate("*", currentScreen, -1);
   console.log(`invertedNum length = ${invertedNum.length}`);
   if ((invertedNum + "").length > maxNumberDigits + 1) {
-    invertedNum = Number(invertedNum).toExponential(2);
+    invertedNum = Number(invertedNum).toExponential(5);
     console.log(`invertedNum after checking length ${invertedNum}`);
   }
   updateScreen(invertedNum);
@@ -283,6 +233,10 @@ const plusMinusPushed = function () {
 ///////////////////////////////////////
 // percentage sign pressed
 
+const percentPushed = function () {
+  updateScreen(operate("/", output.textContent, 100));
+};
+
 ///////////////////////////////////////
 // helper functions
 
@@ -293,21 +247,29 @@ const unToggleOperators = function () {
   btnMinus.classList.remove("operator-pressed");
 };
 
+///////////////////////////////////////
+// just a function to update the screen
 const updateScreen = function (str) {
   currentScreen = str;
   output.textContent = currentScreen;
 };
+
+///////////////////////////////////////
+// function to toggle on and off when AllClear button should change to Clear button
 
 const toggleClear = function (bool) {
   bool ? (btnClearAll.textContent = "C") : (btnClearAll.textContent = "AC");
   console.log(btnClearAll.textContent);
 };
 
+///////////////////////////////////////
+// fun function for when someone divides by zero
+
 const divideByZero = function () {
-  let counter = 30;
+  let counter = 55;
   let meaningOfLifeCounter = 0;
   const meaningOfLifeMessage =
-    "epstein didn't kill himself doge coin to the moon";
+    "epstein didn't kill himself doge coin to the moon 🚀";
   output.textContent = "";
   output.style.fontSize = "10px";
   const meaningOfLifeInterval = setInterval(() => {
@@ -316,7 +278,7 @@ const divideByZero = function () {
       meaningOfLifeCounter + 1
     );
     meaningOfLifeCounter++;
-    if (meaningOfLifeCounter > meaningOfLifeMessage.length) {
+    if (meaningOfLifeCounter > meaningOfLifeMessage.length + 20) {
       output.style.fontSize = "150%";
       output.textContent = "0";
       clearInterval(meaningOfLifeInterval);
@@ -324,7 +286,7 @@ const divideByZero = function () {
   }, 100);
 
   let divideZeroInterval = setInterval(() => {
-    if (counter == 30) {
+    if (counter == 55) {
       divideZero.style.display = "block";
     }
     counter--;
@@ -338,6 +300,58 @@ const divideByZero = function () {
   }, 100);
 };
 
+const fitNumber = function (result) {
+  // if number is negative, flag it
+  let negativeNum = "";
+
+  if (result < 0) negativeNum = "-";
+
+  // if the result is a number with a decimal point
+  // and doesn't include an exponent (eg. 0.333333 or 523.1919191)
+  if (result.includes(".") && !result.includes("e")) {
+    // this regex gets all the digits before the decimal point
+    const wholeNumber = negativeNum + result.match(/\d*(?=[.])/);
+    // this regex gets everything after the decimal point
+    let decimalNumber = "0." + result.match(/[^.]*$/);
+
+    // we want to find how many decimals we are allowed
+    // based on the number of wholeNumber digits
+    const numOfDecimalsAllowed = maxNumberDigits - wholeNumber.length;
+    console.log(numOfDecimalsAllowed);
+    // here we cut off the number of allowed decimals, and round the last decimal
+    // after our maximum allowed numbers and convert back to string
+    // using the same regex as before to remove the 0.
+    // we multiply by 1 to remove the trailing zeroes eg. (0.832000)
+    decimalNumber = (
+      Number(decimalNumber).toFixed(numOfDecimalsAllowed) * 1 +
+      ""
+    ).match(/[^.]*$/);
+    console.log(`decimalNumber after round${decimalNumber}`);
+
+    // if we rounded to 1, increase the whole number by 1 and delete the decimal
+    if (decimalNumber == 1) {
+      wholeNumber++;
+      decimalNumber = "";
+    }
+
+    // in this case, the wholeNumber is already too big
+    // just return the whole number as an exponential
+    if (numOfDecimalsAllowed <= 0) {
+      if (wholeNumber.length <= maxNumberDigits) {
+        result = wholeNumber;
+        return result + "";
+      }
+      result = Number(wholeNumber).toExponential(5);
+      return result + "";
+    }
+
+    // check that the decimalNumber is greater than zero
+    if (decimalNumber > 0) return wholeNumber + "." + decimalNumber;
+    else return wholeNumber;
+  }
+  result = Number(result).toExponential(5);
+  return result + "";
+};
 ///////////////////////////////////////
 // button event listeners
 
@@ -354,4 +368,4 @@ btnMultiply.addEventListener("click", operatorPushed);
 btnEquals.addEventListener("click", equalsPushed);
 btnClearAll.addEventListener("click", clearPushed);
 btnPlusMinus.addEventListener("click", plusMinusPushed);
-btnPercentage;
+btnPercentage.addEventListener("click", percentPushed);
