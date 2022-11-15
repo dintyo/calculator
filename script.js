@@ -8,7 +8,7 @@ let currentScreen = "";
 let calculatedValue = 0;
 let calcArr = [0];
 let operatorFlag = false;
-const maxNumberDigits = 9;
+const maxNumberDigits = 11;
 
 ///////////////////////////////////////
 // DOM elements
@@ -39,6 +39,7 @@ const btnEquals = document.querySelector("#btn-equals");
 const btnPlusMinus = document.querySelector("#btn-plus-minus");
 
 const output = document.querySelector(".output-screen");
+const divideZero = document.querySelector(".divide-zero");
 
 ///////////////////////////////////////
 // calculation functions
@@ -56,6 +57,11 @@ const multiply = function (a, b) {
 };
 
 const divide = function (a, b) {
+  if (b == 0) {
+    divideByZero();
+    return "";
+  }
+
   return Number(a) / Number(b);
 };
 
@@ -232,6 +238,7 @@ const numButtonPushed = function (e) {
     updateScreen(currentScreen);
     console.log("got here");
     operatorFlag = false;
+    toggleClear(1);
     return;
   }
 
@@ -263,7 +270,7 @@ const plusMinusPushed = function () {
   let invertedNum = Number(currentScreen) * -1;
   console.log(invertedNum > 9e8);
   console.log(`invertedNum length = ${invertedNum.length}`);
-  if ((invertedNum + "").length >= maxNumberDigits) {
+  if ((invertedNum + "").length > maxNumberDigits + 1) {
     invertedNum = Number(invertedNum).toExponential(2);
     console.log(`invertedNum after checking length ${invertedNum}`);
   }
@@ -294,6 +301,41 @@ const updateScreen = function (str) {
 const toggleClear = function (bool) {
   bool ? (btnClearAll.textContent = "C") : (btnClearAll.textContent = "AC");
   console.log(btnClearAll.textContent);
+};
+
+const divideByZero = function () {
+  let counter = 30;
+  let meaningOfLifeCounter = 0;
+  const meaningOfLifeMessage =
+    "epstein didn't kill himself doge coin to the moon";
+  output.textContent = "";
+  output.style.fontSize = "10px";
+  const meaningOfLifeInterval = setInterval(() => {
+    output.textContent += meaningOfLifeMessage.slice(
+      meaningOfLifeCounter,
+      meaningOfLifeCounter + 1
+    );
+    meaningOfLifeCounter++;
+    if (meaningOfLifeCounter > meaningOfLifeMessage.length) {
+      output.style.fontSize = "150%";
+      output.textContent = "0";
+      clearInterval(meaningOfLifeInterval);
+    }
+  }, 100);
+
+  let divideZeroInterval = setInterval(() => {
+    if (counter == 30) {
+      divideZero.style.display = "block";
+    }
+    counter--;
+    console.log(divideZero.textContent);
+    if (counter % 2 == 0) divideZero.textContent = "🔥";
+    else divideZero.textContent = "💥";
+    if (counter < 1) {
+      divideZero.style.display = "none";
+      clearInterval(divideZeroInterval);
+    }
+  }, 100);
 };
 
 ///////////////////////////////////////
